@@ -1,14 +1,355 @@
 <html>
 <style>
+#todo{
+width:100%;
+height:100%;
+}
+#work{
+    width: 100%;
+    height: 100%;
+    background-color: chartreuse;
+}
+#editor{
+    width: 100%;
+    height: 80%;
+    background-color:  white;
 
-
+    border-style: double;
+}
 </style>
+
+
+
+<button onclick="printPdf()">Print/Pdf</button>
+<button onclick="printImg()">Print/Pdf Img</button>
+<button onclick="DownloadImg()">Dwnload Img</button>
+<select id="soptcs" oninput="doopcs(this.value)">
+<option>Select an option</option>
+<option>Get Text form Web</option>
+<option>Set Link of Web</option>
+</select>
+
+<div id="todo">
+
+<textarea id="editor"></textarea>
+</div>
 
 
 
 <script>
 
+var maxWidth = 280;
+var lineHeight = 30;
 
+function doopcs(v){    alert(v)
+    if(v==="Get Text form Web"){
+    
+        GetJ("https://jsonblob.com/api/1143265682627878912",function(res){
+           alert(res)
+           editor.value=JSON.stringify(res)
+
+       })
+    
+    }
+    if(v==="Set Link of Web"){
+       GetJ("https://jsonblob.com/api/1143265682627878912",function(res){
+           alert(res)
+       //    editor.value=res
+
+       })
+    
+    }
+    if(v===""){
+        
+    }
+    if(v===""){
+        
+    }
+    if(v===""){
+        
+    }
+}
+function GetJ(url, callback) {
+        try {
+            //var url  = "http://localhost:8080/api/v1/users";
+            var xhr = new XMLHttpRequest()
+            xhr.open('GET', url + '/1', true)
+            xhr.onload = function() {
+                //  alert(xhr.responseText.indexOf("{"))
+                if (xhr.responseText.indexOf("{") === 0 || xhr.responseText.indexOf("[") === 0) {
+                    var users = JSON.parse(xhr.responseText);
+                } else {
+                    alert("doesn't looks like an object");
+                    return;
+                }
+                //     var obb=decoding(users.prim);
+
+                if (xhr.readyState == 4 && xhr.status == "200") {
+                    callback(users);
+                } else {
+                    //console.error(users);
+                    alert("Something Wrong")
+                    callback(users);
+                }
+            }
+            xhr.send(null);
+        } catch (e) {
+            alert(e)
+        };
+    }
+
+function printPdf(){
+    printDoc(editor.value, function(){alert("done")})
+   editor.style.display="block"
+
+}
+function printImg(){
+    editor.style.display="none"
+   var pgs= TextOnCanvasDoc(editor.value, "20px Areal", "black", "white", 5, 5, 18);//, canvasops
+   var d=document.createElement("div")
+   for(var i=0;i<pgs.length;i++){
+         d.appendChild(pgs[i]);
+   }
+   printCanvas(d)
+ 
+
+}
+function DownloadImg(){
+doc()
+}
+function loadDoc(url, callback) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", url, false);
+        xhttp.send();
+        callback(xhttp.responseText);
+
+    }
+//http://jsonblob.com/1143265682627878912
+
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+    var paragraphs = text.split('\n');
+    for (var i = 0; i < paragraphs.length; i++) {
+        var line = '';
+        var words = paragraphs[i].split(' ');
+        for (var n = 0; n < words.length; n++) { // alert(words[n])
+
+            var testLine = line + words[n] + ' ';
+            var metrics = context.measureText(testLine);
+            var testWidth = metrics.width;
+            if (words[n].indexOf('\n') > -1 || testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        context.fillText(line, x, y);
+        y += lineHeight;
+    }
+
+}
+
+
+var cwidth = 550;
+function doc(){
+    TextOnCanvasDoc(editor.value, '14px Unknown, sans-serif', "#000", "#fff", 20, 20, 18, {
+    width: cwidth,
+    height: cwidth * 11 / 8.5
+});
+}
+
+todo.style.overflow = "auto";
+for (var i = 0; i < doc.length; i++) {
+
+    doc[i].setAttribute("onclick", "if(confirm('Do you want to download this page?')) DownloadCanvas(this)")
+    todo.appendChild(document.createElement("br"));
+    todo.appendChild(document.createElement("br"));
+}
+
+/**/
+function TextOnCanvas(Canvas, text, font, color, bkgcolor, marginTop, maxWidth, lineHeight, canvasops) {
+    var canvas = document.createElement("canvas");
+
+    canvas.style.background = bkgcolor;
+    var x = (canvas.width - maxWidth) / 2,
+        y = marginTop;
+    context = canvas.getContext('2d');
+    context.font = font; //'15pt script';//'15pt Calibri';
+    context.fillStyle = color; // '#333';
+    var paragraphs = text.split('\n');
+    for (var i = 0; i < paragraphs.length; i++) {
+        var line = '';
+        var words = paragraphs[i].split(' ');
+        for (var n = 0; n < words.length; n++) { // alert(words[n])
+
+            var testLine = line + words[n] + ' ';
+            var metrics = context.measureText(testLine);
+            var testWidth = metrics.width;
+            if (words[n].indexOf('\n') > -1 || testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        context.fillText(line, x, y);
+        y += lineHeight;
+    }
+    if (Canvas == null) {
+        return canvas;
+    }
+
+
+
+};
+
+function TextOnCanvasDoc(text, font, color, bkgcolor, marginTop, marginWidth, lineHeight, canvasops) {
+    var r = 11 / 8.5;
+    var pages = [];
+
+    var canvas = document.createElement("canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = canvas.width * r;
+
+    canvas.style.background = bkgcolor;
+    var x = marginWidth,
+        y = marginTop;
+    context = canvas.getContext('2d');
+    context.font = font;
+    context.fillStyle = color;
+    pages.push(canvas);
+    var paragraphs = text.split('\n');
+    for (var i = 0; i < paragraphs.length; i++) {
+        var line = '';
+        var words = paragraphs[i].split(' ');
+        for (var n = 0; n < words.length; n++) {
+            if (y + lineHeight > canvas.height) {
+
+                canvas = document.createElement("canvas");
+                canvas.width = 600;
+                canvas.height = canvas.width * r;
+
+                canvas.style.background = bkgcolor;
+                var x = marginWidth,
+                    y = marginTop;
+                context = canvas.getContext('2d');
+                context.font = font;
+                context.fillStyle = color;
+                pages.push(canvas);
+
+            }
+
+            var testLine = line + words[n] + ' ';
+            var metrics = context.measureText(testLine);
+            var testWidth = metrics.width;
+            if (words[n].indexOf('\n') > -1 || testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        context.fillText(line, x, y);
+        y += lineHeight;
+    }
+    return pages;
+
+
+};
+
+function downloadDoc(contrato) {
+    //alert(doc.length)
+
+    for (var i = 0; i < doc.length; i++) {
+        DownloadCanvas(doc[i]);
+    }
+}
+
+
+function printDoc(tx, callback) {
+
+    tx = tx.replace(/\n/g, "<br>");
+
+    childWindow = window.open('', 'childWindow', 'location=yes, menubar=yes, toolbar=yes');
+    childWindow.document.open();
+
+    childWindow.document.write('<html><head><title>Contrato Comando Unico</title></head><body "><p style="width:100%;height:100%;border:none;padding:0px;font-size:16px">' + tx + '</p>'); //height:auto;
+
+    childWindow.document.write('</body></html>');
+    var a = childWindow.document.body.getElementsByTagName("p")[0];
+    childWindow.print();
+
+    a.onclick = function() {
+        childWindow.document.close();
+        childWindow.close();
+    };
+
+
+    if (callback != undefined) {
+        callback();
+    } 
+
+}
+function printCanvas(e, callback) {
+alert(e.innerHTML)
+  //  tx = tx.replace(/\n/g, "<br>");
+var html=e.innerHTML;
+    childWindow = window.open('', 'childWindow', 'location=yes, menubar=yes, toolbar=yes');
+    childWindow.document.open();
+    var bb=document.createElement("body");
+    childWindow.document.appendChild(bb);
+    bb.appendChild(e)
+   var a=e;
+    childWindow.print();
+
+    a.onclick = function() {
+        childWindow.document.close();
+        childWindow.close();
+    };
+
+
+    if (callback != undefined) {
+        callback();
+    } 
+
+}
+
+function dwnloadPic(c) {
+
+    alert("%%%")
+    c.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var fileName = 'pic-' + document.title + '-' + Date.now(); //png';
+        var anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.setAttribute("download", fileName);
+        anchor.className = "download-js-link";
+        anchor.innerHTML = "downloading...";
+        anchor.style.display = "none";
+        document.body.appendChild(anchor);
+        setTimeout(function() {
+            anchor.click();
+            document.body.removeChild(anchor);
+        }, 1);
+
+    }, 'image/jpeg');
+}
+
+
+DownloadCanvas = function(c) {
+    let downloadLink = document.createElement('a');
+
+    var fileName = 'pic-' + document.title + '-' + Date.now() + ".png";
+    downloadLink.setAttribute('download', fileName);
+    c.toBlob(function(blob) {
+        let url = URL.createObjectURL(blob);
+        downloadLink.setAttribute('href', url);
+        downloadLink.click();
+    });
+}
 
 </script>
 
