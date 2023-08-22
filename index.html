@@ -3,8 +3,9 @@
     <title>Panorama 360</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-</head>
+</head> 
 <style>
+
 #todo{
 width:100%;
 height:100%;
@@ -21,19 +22,25 @@ height:100%;
 
     border-style: double;
 }
+button{
+    margin:15px;
+ 
+}
 </style>
 
 
-
+<div id="controles">
 <button onclick="printPdf()">Print/Pdf</button>
 <button onclick="printImg()">Print/Pdf Img</button>
 <button onclick="DownloadImg()">Dwnload Img</button>
 <select id="soptcs" oninput="doopcs(this.value)">
 <option>Select an option</option>
-<option>Get Text form Web</option>
+<option>Get Content from Web</option>
 <option>Set Link of Web</option>
+<option>Clear Contenido</option>
 </select>
 
+</div>
 <div id="todo">
 
 <textarea id="editor"></textarea>
@@ -42,29 +49,48 @@ height:100%;
 
 
 <script>
-
+ //   localStorage.removeItem("plink")
+var obj={};
 var maxWidth = 280;
 var lineHeight = 30;
+var link=localStorage.getItem("plink");
+if(link===null) {alert("No link found");doopcs("Set Link of Web")}
+else doopcs("Get Content from Web");
+
 
 function doopcs(v){ //   alert(v)
-    if(v==="Get Text form Web"){
-    
-        GetJ("https://jsonblob.com/api/1143265682627878912",function(ob){
- 
+    if(v==="Get Content from Web"){
+   //     GetJ("https://jsonblob.com/api/1143265682627878912",function(ob){
+   
+        GetJ(link,function(ob){
+            obj=ob;
+         editor.value=ob.contenido;
+         if(ob.contenido==="") alert("No contenido found")
 
        })
     
     }
     if(v==="Set Link of Web"){
-       GetJ("https://jsonblob.com/api/1143265682627878912",function(ob){
+        if( link!=null){
+            if(!confirm("This is the actual link "+link+"\n\nDo you want to replace it?"))return;
+        }
 
-       //   alert("...............\n\n"+res)
-           editor.value=ob.contenido
-       })
+        var lin=prompt("Paste or type link","");
+        if(lin===null) lin="";
+        if(lin.indexOf("https://")>-1){
+            if(confirm("Link: "+lin+" Is this Correct?")){
+                link=lin;
+                localStorage.setItem("plink",link);
+                doopcs("Get Content from Web")
+            }
+
+      }
     
     }
-    if(v===""){
-        
+    if(v==="Clear Contenido"){
+        editor.valu="";
+        obj.contenido="";
+        UpdateJ(link,obj,function(){alert("done...")})
     }
     if(v===""){
         
@@ -74,41 +100,39 @@ function doopcs(v){ //   alert(v)
     }
 }
 function GetJ(url, callback) {
-        try {
-            //var url  = "http://localhost:8080/api/v1/users";
-            var xhr = new XMLHttpRequest()
-            xhr.open('GET', url + '/1', true)
-            xhr.onload = function() {
-             //   alert(xhr.responseText)
-              //  if(callback!=undefined) callback()
-                //  alert(xhr.responseText.indexOf("{"))
-                if (xhr.responseText.indexOf("{") === 0 || xhr.responseText.indexOf("[") === 0) {
-                    var users = JSON.parse(xhr.responseText);
-                } else {
-                    if(callback!=undefined){ callback(xhr.responseText)
-                    users = xhr.responseText;
-                    alert("doesn't look like an object");
-                    return users;
-                }
 
-                   // return;
-                }
-                //     var obb=decoding(users.prim);
-
-                if (xhr.readyState == 4 && xhr.status == "200") {
-                    callback(users);
-                } else {
-                    //console.error(users);
-                    alert("Something Wrong")
-                    callback(users);
-                }
-            }
-            xhr.send(null);
-        } catch (e) {
-            alert(e)
-        };
+//var url  = "http://localhost:8080/api/v1/users";
+var xhr = new XMLHttpRequest()
+xhr.open('GET', url + '/1', true)
+xhr.onload = function() {
+     var users = JSON.parse(xhr.responseText);
+      if (xhr.readyState == 4 && xhr.status == "200") {
+        callback(users);
+    } else {
+        alert(users);
     }
+}
+xhr.send(null);
+}
 
+
+    function UpdateJ(url, ob, callback) {
+
+json = JSON.stringify(ob);
+var xhr = new XMLHttpRequest();
+xhr.open("PUT", url + '/12', true);
+xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+xhr.onload = function() {
+    var users = JSON.parse(xhr.responseText);
+    if (xhr.readyState == 4 && xhr.status == "200") {
+        //  alert("Tu Forma ha sido Enviada");
+        if (callback != undefined) callback(users);
+    } else {
+        (users);
+    }
+}
+xhr.send(json);
+}
 function printPdf(){
     printDoc(editor.value, function(){alert("done")})
    editor.style.display="block"
