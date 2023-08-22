@@ -79,7 +79,8 @@ function GetJ(url, callback) {
                 if (xhr.responseText.indexOf("{") === 0 || xhr.responseText.indexOf("[") === 0) {
                     var users = JSON.parse(xhr.responseText);
                 } else {
-                    alert("doesn't looks like an object");
+                    user = xhr.responseText;
+                    alert("doesn't look like an object");
                    // return;
                 }
                 //     var obb=decoding(users.prim);
