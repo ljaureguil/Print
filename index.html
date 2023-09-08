@@ -33,11 +33,13 @@ button{
 <button onclick="printPdf()">Print/Pdf</button>
 <button onclick="printImg()">Print/Pdf Img</button>
 <button onclick="DownloadImg()">Dwnload Img</button>
+
 <select id="soptcs" oninput="doopcs(this.value)">
 <option>Select an option</option>
 <option>Get Content from Web</option>
 <option>Set Link of Web</option>
 <option>Clear Contenido</option>
+<option>Save Changes to Web</option>
 </select>
 
 </div>
@@ -68,6 +70,15 @@ function doopcs(v){ //   alert(v)
        })
     
     }
+      if(v==="Save Changes to Web"){
+      obj.content=editor.value;
+      
+        UpdateJ(link,obj,function(ob){
+         alert("Done...")
+       })
+    
+    }
+    
     if(v==="Set Link of Web"){
         if( link!=null){
             if(!confirm("This is the actual link "+link+"\n\nDo you want to replace it?"))return;
