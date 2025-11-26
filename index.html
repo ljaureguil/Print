@@ -1,6 +1,6 @@
 <html>
     <link rel="icon" href="https://freepngimg.com/save/14495-orange-png-clipart/744x744">
-    <title>Panorama 360</title>
+    <title>Print</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 </head> 
@@ -33,7 +33,8 @@ button{
 <button onclick="printPdf()">Print/Pdf</button>
 <button onclick="printImg()">Print/Pdf Img</button>
 <button onclick="DownloadImg()">Dwnload Img</button>
-
+<button onclick="getPub()">Get pub</button>
+<button onclick="getPriv()">Get priv</button>
 <select id="soptcs" oninput="doopcs(this.value)">
 <option>Select an option</option>
 <option>Get Content from Web</option>
@@ -56,9 +57,9 @@ var obj={};
 var maxWidth = 280;
 var lineHeight = 30;
 var link=localStorage.getItem("plink");
-if(link===null) {alert("No link found");doopcs("Set Link of Web")}
+/*if(link===null) {alert("No link found");doopcs("Set Link of Web")}
 else doopcs("Get Content from Web");
-
+*/
 
 function doopcs(v){ //   alert(v)
     if(v==="Get Content from Web"){
@@ -395,6 +396,14 @@ DownloadCanvas = function(c) {
     });
 }
 
+function getPub(){
+loadDoc("https://raw.githubusercontent.com/ljaureguil/Print/refs/heads/main/Conpuv",function(r){editor.value=r});
+
+}
+
+function getPriv(){
+loadDoc("https://raw.githubusercontent.com/ljaureguil/Print/refs/heads/main/cpriv",function(r){editor.value=r})
+}
 </script>
 
 
